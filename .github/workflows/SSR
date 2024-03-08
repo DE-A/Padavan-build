@@ -1,0 +1,28 @@
+https://www.right.com.cn/forum/thread-8272808-1-1.html
+
+until ping -c 1 223.5.5.5 >/dev/null;do sleep 10;done
+if [ ! -f /opt/bin/opkg ];then
+  mount -t tmpfs tmpfs /opt -o size=30M
+  for folder in bin etc lib/opkg tmp var/lock
+    do
+    [ ! -d "/opt/$folder" ] && mkdir -p /opt/$folder
+    done
+  wget http://mirrors.bfsu.edu.cn/entware/mipselsf-k3.4/installer/opkg -O /opt/bin/opkg
+  chmod 755 /opt/bin/opkg
+  wget http://mirrors.bfsu.edu.cn/entware/mipselsf-k3.4/installer/opkg.conf -O /opt/etc/opkg.conf
+  sed -i 's|bin.entware.net|mirrors.bfsu.edu.cn/entware|g' /opt/etc/opkg.conf
+  /opt/bin/opkg update
+  /opt/bin/opkg install shadowsocks-libev-ss-server
+  cat > /opt/etc/shadowsocks.json <<EOF
+{
+    "server":["::1", "0.0.0.0"],
+    "mode":"tcp_and_udp",
+    "server_port":端口,
+    "local_port":1080,
+    "password":"密码",
+    "timeout":86400,
+    "method":"chacha20-ietf-poly1305"
+}
+EOF
+  /opt/bin/ss-server -c /opt/etc/shadowsocks.json &
+fi
